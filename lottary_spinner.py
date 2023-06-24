@@ -1,24 +1,24 @@
 import random
 
-MAX_LINES = 4
+MAX_LINES = 5
 MAX_BET = 100
 MIN_BET = 1
 
-ROWS = 4
+ROWS = 5
 COLS = 3
 
 symbol_count = {
     "A": 3,
     "B": 4,
-    "C": 5,
-    "D": 6,
-    "E": 10,
+    "C": 6,
+    "D": 8,
+    "E": 12,
 }
 symbol_value = {
-    "A": 6,
-    "B": 5,
-    "C": 4,
-    "D": 3,
+    "A": 5,
+    "B": 4.5,
+    "C": 3,
+    "D": 2.5,
     "E": 2
 }
 
@@ -46,6 +46,30 @@ def print_machine_spin(columns):
             else:
                 print(column[row], end="")
         print()
+
+def check_winnings(columns, lines, betting_amount, values):
+    winnings = 0
+    winning_lines = []
+    winning_count = 0
+    for line in range(lines):
+        symbol = columns[0][line]
+        for col in columns:
+            symbol_to_check = col[line]
+            if symbol != symbol_to_check:
+                break
+        else:
+            winnings += values[symbol] * betting_amount[line]
+            winning_lines.append(line + 1)
+            winning_count += 1
+    if winning_count == 2:
+        winnings *= 2
+    elif winning_count == 3:
+        winnings *= 3
+    elif winning_count == 4:
+        winnings *= 4
+    elif winning_count == 5:
+        winnings *= 5
+    return winnings, winning_lines
 
 def deposit():
     while True:
@@ -99,7 +123,20 @@ def spin(balance):
     slot = get_machine_spin(ROWS, COLS, symbol_count)
     print_machine_spin(slot)
 
+    winning, winning_lines = check_winnings(slot, lines, betting_amount, symbol_value)
+    print(f"You won ${winning}.")
+    print(f"You won on lines:", *winning_lines)
+    return winning - total_betting_amount
+
 def main():
     balance = deposit()
-    play = spin(balance)
+    while True:
+        print(f"Your current balance is ${balance}")
+        answer = input("Press enter if you want to continue playing. (Hope you will be winning more this this).\n If you wish to quit press q. Thank You. I was hopping you could win this this.")
+        
+        if answer == 'q':
+            break
+        balance += spin(balance)
+    print(f"You have now ${balance} left.")
+
 main()
